@@ -1,0 +1,5 @@
+[book]
+authors = ["Dan Ravensloft"]
+multilingual = false
+src = "src"
+title = "Writing a PS2 BIOS in Rust"
