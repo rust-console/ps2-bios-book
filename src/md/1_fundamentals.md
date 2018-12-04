@@ -21,7 +21,11 @@ of other processors, which is why I will call the CPU itself the R5900), and the
 in the Input/Output Processor. "Emotion Engine" and "Input/Output Processor" are quite long names,
 so I will sometimes call them the "EE" and "IOP" respectively.
 
-[very high level diagram here]
+It also has a custom GPU called the Graphics Synthesizer, which I will call the "GS".
+
+These are connected together like this:
+
+![high level diagram](/ps2-bios-book/svg/1_fundamentals_1.svg)
 
 These CPUs both use the MIPS instruction set, though the R3051 uses 32-bit MIPS I, and the R5900
 uses 64-bit MIPS III.
@@ -34,6 +38,7 @@ link.
 
 The PS2 BIOS boot process at a very high level like this:
 
+- Both CPUs start from same BIOS ROM.
 - Figure out if you are the R5900 (Emotion Engine CPU) or the R3051 (Input/Output Processor CPU).
 - If you are the R5900:
   - Load and run the EE kernel.

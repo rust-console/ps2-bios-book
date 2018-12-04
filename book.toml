@@ -2,4 +2,4 @@
 authors = ["Dan Ravensloft"]
 multilingual = false
 src = "src"
-title = "Writing a PS2 BIOS in Rust"
+title = "Writing a PlayStation 2 BIOS in Rust"
