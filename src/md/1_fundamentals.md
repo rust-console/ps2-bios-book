@@ -25,7 +25,7 @@ It also has a custom GPU called the Graphics Synthesizer, which I will call the 
 
 These are connected together like this:
 
-![high level diagram](/ps2-bios-book/svg/1_fundamentals_1.svg)
+![High level diagram showing the EE and IOP connected, and the EE and GS connected](/ps2-bios-book/svg/1_fundamentals_1.svg)
 
 These CPUs both use the MIPS instruction set, though the IOP uses 32-bit MIPS I, and the EE
 uses 64-bit MIPS III.
