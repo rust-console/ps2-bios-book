@@ -11,11 +11,26 @@ its Interrupt Descriptor Table, and the Embedded Rust Book has a
 crate family for handling ARM exceptions.
 
 Both x86 and ARM use tables of function pointers at a fixed location in memory, with additional
-bells and whistles for x86 such as interrupt stacks. MIPS takes a very different approach.
+bells and whistles for x86 such as interrupt stacks. MIPS takes a different approach, which
+simplifies processor exception handling, but makes software a bit more complex.
+
+In MIPS, you get a 32 instruction area to store an exception handler. The specific location and
+handler types depend on the processor, but they are located near the beginning of ROM or RAM,
+depending on a configuration bit.
+
+This limited space means your handler will usually use a jump table to handle exceptions, and the
+coprocessor registers are designed with this in mind: the exception code in COP0 register 13
+occupies bits 7 to 2, which makes loading the relevant offset from a table of addresses a simple
+AND instruction.
+
+Additionally, MIPS uses a dedicated handler for a commonly occurring exception - "TLB Miss",
+where the processor doesn't know how to map a virtual memory address to physical memory address -
+which speeds up exception handling in that situation.
+
+## Exception handling process
 
 When an exception occurs:
-- The processor switches to kernel mode and sets an exception indicator bit in COP0 register 12
-(processor status, or Status).
+- The processor switches to kernel mode.
 - The exception code is written to part of COP0 register 13 (the exception cause register, or
 Cause).
 - The current program counter is written to COP0 register 14 (the exception program counter, or
@@ -26,15 +41,26 @@ program counter is written instead and a branch delay bit is set in Cause.
 - The processor then jumps to a fixed address in memory that depends on the exception and chip,
 and starts executing code there.
 
-Got all that? No? I'll keep going then.
+Additionally:
+- The EE sets an exception indicator bit in COP0 register 12 (processor status, or Status).
+- The EE has multiple levels of exceptions: "level 1 exceptions" are the ones we're going to talk
+about, but there are also "level 2 exceptions", which include processor reset, non-maskable
+interrupts, performance counter overflow and debug exceptions.
+- The IOP has a 3-level stack of interrupt/mode state. When an exception occurs, the current state
+is pushed to the stack, and a kernel mode, interrupt disabled state is pushed. At the end of a 
+exception handler, the interrupt/mode state is popped from the stack, restoring it to the state
+before the exception.
 
-MIPS gives you a limited amount of space to write your exception handlers - 32 instructions - so
-your code has to be rather concise, or jump to a function with more room to work. However, parts of
-the COP0 registers are tailored for making life easier; the exception code is placed at bits 7 to 2
-(0 = least significant bit), so that it can be used to index a jump table with a simple mask. MIPS
-also breaks up different exception categories into different handlers - one commonly occurring
-exception ("TLB Miss" - where the processor doesn't know how to map a virtual memory address to a
-physical memory address) has a dedicated handler on both CPUs.
+> The only level 2 exception you need to care about is the Reset exception, and that's simply when
+> your code starts executing, so you handle it anyway. The other three are reserved mostly for
+> the PlayStation 2 development console, called the TOOL, where it would be useful to examine
+> memory at a particular point in the program.
+
+> Note that the processor does *not* save register state for you; you must do this yourself. For
+> this purpose, MIPS ABIs reserve registers `$k0` and `$k1` for kernel exception bootstrapping.
+> I suggest putting the kernel stack pointer in `$k0`, and using `$k1` as a scratch register.
+
+Got all that? No? I'll keep going then.
 
 ## Exception codes
 
@@ -71,7 +97,8 @@ Speaking of those exception codes, here they are (for both CPUs):
 Where these exception handlers go depends on the processor, and on a bit in Status called
 "Bootstrap Exception Vectors" (BEV) which is used for exception handlers in the ROM.
 
-> I will use the physical address conventions for these memory locations.
+> I will use the physical address conventions for these memory addresses. Remember that
+> `0000'0000` is the start of RAM, and `1FC0'0000` is the start of ROM.
 
 For the IOP:
 - TLB Miss exceptions go to `1FC0'0100` in BEV mode, or `0000'0000` normally.
