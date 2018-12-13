@@ -1,0 +1,289 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Wellington Bootloader - Writing a PlayStation 2 BIOS in Rust</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "../";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../md/1_fundamentals.html"><strong aria-hidden="true">1.</strong> Putting The &quot;Mental&quot; In Fundamentals</a></li><li><ol class="section"><li><a href="../md/1_1_target.html"><strong aria-hidden="true">1.1.</strong> Targets: Ready... Aim...</a></li></ol></li><li><a href="../md/2_bootloader.html" class="active"><strong aria-hidden="true">2.</strong> Wellington Bootloader</a></li><li><ol class="section"><li><a href="../md/2_1_ee_boot.html"><strong aria-hidden="true">2.1.</strong> Booting: An Emotional Experience</a></li><li><a href="../md/2_2_iop_boot.html"><strong aria-hidden="true">2.2.</strong> Booting: Hell on Earth</a></li></ol></li><li><a href="../md/3_exceptions.html"><strong aria-hidden="true">3.</strong> Every Rule Has An Exception...</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Writing a PlayStation 2 BIOS in Rust</h1> 
+
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#ii-wellington-bootloader" id="ii-wellington-bootloader"><h1>II. Wellington Bootloader</h1></a>
+<blockquote>
+<p>This chapter to written to show you what <em>would</em> be possible with compiler support. However, it
+does talk about the architecture of MIPS, and you'll need it later.</p>
+</blockquote>
+<p>Remember the <a href="/ps2-bios-book/md/1_fundamentals.html#the-boot-process">steps to boot the console</a>? Let's put
+those into action.</p>
+<a class="header" href="#both-cpus-start-from-the-same-bios-rom" id="both-cpus-start-from-the-same-bios-rom"><h2>&quot;Both CPUs start from the same BIOS ROM&quot;</h2></a>
+<p>Both CPUs start at the same fixed address in the virtual memory space: <code>BFC0'0000</code>, the start of
+BIOS ROM.</p>
+<blockquote>
+<p>Both CPUs effectively mask the virtual address with <code>1FFF'FFFF</code>. This results in <code>BFC0'0000</code>
+being mapped to <code>1FC0'0000</code> by both chips; the two addresses are interchangeable and reference the
+same data. As you will see later, <code>BFC0'0000</code> seems to have practical problems in binutils (it
+seems like the pointer is treated as signed, leading to strange behaviour), so I will often refer
+to <code>1FC0'0000</code>, which does not have these issues.</p>
+</blockquote>
+<blockquote>
+<p>Also worth mentioning is that in MIPS, everything with the virtual <code>8000'0000</code> bit set is kernel
+memory space and everything without it set is user memory. This is a mostly theoretical
+distinction when working with a bare metal MIPS target like the PlayStation 2 though, because the
+console is almost always in kernel mode when playing a game.</p>
+</blockquote>
+<a class="header" href="#figure-out-if-you-are-the-ee-or-iop" id="figure-out-if-you-are-the-ee-or-iop"><h2>&quot;Figure out if you are the EE or IOP&quot;</h2></a>
+<p>MIPS has a 4 coprocessor interface baked into the ISA; this provides a standard method of accessing
+custom features of each chip without needing a new assembler for each of them. These coprocessors
+were left defined but unspecified, however MIPS has conventions for them:</p>
+<ul>
+<li>Coprocessor 0 (COP0) is the system control coprocessor; essentially a set of registers containing
+processor state. Because it contains such important information, it is mandatory and found in all
+MIPS processors.</li>
+<li>Coprocessor 1 (COP1) is the floating point unit, and all floating point math goes through it. The
+IOP does not have a floating point unit, and the EE's floating point unit is very nonstandard, which
+is why our code doesn't use them.</li>
+<li>Coprocessor 2 (COP2) is left for custom accelerators, and both the EE and IOP use them.</li>
+<li>Coprocessor 3 was originally for more custom accelerators, but it got repurposed into more
+floating point operations. Neither CPU has this coprocessor.</li>
+</ul>
+<p>We will need COP0 for this, and it too has conventions for register names and contents, although
+not specifically what the register contains. The specific register we need is COP0 register 15,
+which has the mnemonic &quot;PRid&quot; for &quot;Processor Identification&quot;.</p>
+<p>The PRid register looks like ths in both CPUs:</p>
+<p><em>[fancy diagram showing the least significant byte being marked &quot;revision number&quot; and the second
+least significant byte being marked &quot;model number&quot;; the other bytes are &quot;reserved&quot;]</em></p>
+<p>On the EE, the model number is <code>0x2E</code>, while on the IOP the model number is <code>0x00</code> (it was a much
+earlier core), which means we just need to check what the model number field is and jump to the
+appropriate function.</p>
+<p>To get a register from coprocessor 0, we use <code>mfc0 &lt;dest reg&gt; &lt;cop0 reg&gt;</code>.</p>
+<p>So we could write a function that looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#![no_std]
+#![no_main]
+#![feature(asm)]
+
+#fn main() {
+mod cop0 {
+    pub fn prid() -&gt; u32 {
+        let prid;
+        unsafe { asm!(&quot;mfc0 $0, $$15&quot; : &quot;=r&quot; (prid)) };
+        prid
+    }
+}
+
+fn ee_setup() -&gt; ! {
+    unimplemented!(&quot;EE code goes here&quot;);
+}
+
+fn iop_setup() -&gt; ! {
+    unimplemented!(&quot;IOP code goes here&quot;);
+}
+
+fn _start() -&gt; ! {
+    let prid = cop0::prid();
+    let model = prid &amp; 0xFF00;
+
+    match model {
+        0x2E00 =&gt; ee_setup(),
+        0x0000 =&gt; iop_setup(),
+        _ =&gt; unimplemented!(&quot;Couldn't detect host processor&quot;),
+    }
+}
+
+#}</code></pre></pre>
+<blockquote>
+<p>If we could compile code for the IOP, anyway. Note that it won't compile on the Rust Playground
+because the Playground runs on x86.</p>
+</blockquote>
+<a class="header" href="#load-and-run-the-eeiop-kernel" id="load-and-run-the-eeiop-kernel"><h2>&quot;Load and run the EE/IOP kernel&quot;</h2></a>
+<p>Here's where things become a little painful.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../md/1_1_target.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../md/2_1_ee_boot.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../md/1_1_target.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../md/2_1_ee_boot.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

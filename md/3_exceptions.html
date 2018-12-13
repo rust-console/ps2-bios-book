@@ -1,0 +1,306 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Every Rule Has An Exception... - Writing a PlayStation 2 BIOS in Rust</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "../";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../md/1_fundamentals.html"><strong aria-hidden="true">1.</strong> Putting The &quot;Mental&quot; In Fundamentals</a></li><li><ol class="section"><li><a href="../md/1_1_target.html"><strong aria-hidden="true">1.1.</strong> Targets: Ready... Aim...</a></li></ol></li><li><a href="../md/2_bootloader.html"><strong aria-hidden="true">2.</strong> Wellington Bootloader</a></li><li><ol class="section"><li><a href="../md/2_1_ee_boot.html"><strong aria-hidden="true">2.1.</strong> Booting: An Emotional Experience</a></li><li><a href="../md/2_2_iop_boot.html"><strong aria-hidden="true">2.2.</strong> Booting: Hell on Earth</a></li></ol></li><li><a href="../md/3_exceptions.html" class="active"><strong aria-hidden="true">3.</strong> Every Rule Has An Exception...</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Writing a PlayStation 2 BIOS in Rust</h1> 
+
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p>III. Every Rule Has An Exception...</p>
+<blockquote>
+<p>This post is kind of an information dump; it'll be needed for the next chapter when we actually
+write some exception handlers.</p>
+</blockquote>
+<p>When something sufficiently unusual happens, a processor will raise an exception for the kernel to
+deal with. Each architecture handles them differently; Philipp Opperman has an
+<a href="https://os.phil-opp.com/cpu-exceptions/">excellent post</a> about how x86 handles exceptions through
+its Interrupt Descriptor Table, and the Embedded Rust Book has a
+<a href="https://rust-embedded.github.io/book/start/exceptions.html">section</a> about using the <code>cortex-m</code>
+crate family for handling ARM exceptions.</p>
+<p>Both x86 and ARM use tables of function pointers at a fixed location in memory, with additional
+bells and whistles for x86 such as interrupt stacks. MIPS takes a different approach, which
+simplifies processor exception handling, but makes software a bit more complex.</p>
+<p>In MIPS, you get a 32 instruction area to store an exception handler. The specific location and
+handler types depend on the processor, but they are located near the beginning of ROM or RAM,
+depending on a configuration bit.</p>
+<p>This limited space means your handler will usually use a jump table to handle exceptions, and the
+coprocessor registers are designed with this in mind: the exception code in COP0 register 13
+occupies bits 7 to 2, which makes loading the relevant offset from a table of addresses a simple
+AND instruction.</p>
+<p>Additionally, MIPS uses a dedicated handler for a commonly occurring exception - &quot;TLB Miss&quot;,
+where the processor doesn't know how to map a virtual memory address to physical memory address -
+which speeds up exception handling in that situation.</p>
+<a class="header" href="#exception-handling-process" id="exception-handling-process"><h2>Exception handling process</h2></a>
+<p>When an exception occurs:</p>
+<ul>
+<li>The processor switches to kernel mode.</li>
+<li>The exception code is written to part of COP0 register 13 (the exception cause register, or
+Cause).</li>
+<li>The current program counter is written to COP0 register 14 (the exception program counter, or
+EPC). If the exception happened in a branch delay slot (very rare), the previous instruction
+program counter is written instead and a branch delay bit is set in Cause.</li>
+<li>If the exception is related to memory, the address that caused it is written to COP0 register
+8 (the bad virtual address register, or BadVAddr).</li>
+<li>The processor then jumps to a fixed address in memory that depends on the exception and chip,
+and starts executing code there.</li>
+</ul>
+<p>Additionally:</p>
+<ul>
+<li>The EE sets an exception indicator bit in COP0 register 12 (processor status, or Status).</li>
+<li>The EE has multiple levels of exceptions: &quot;level 1 exceptions&quot; are the ones we're going to talk
+about, but there are also &quot;level 2 exceptions&quot;, which include processor reset, non-maskable
+interrupts, performance counter overflow and debug exceptions.</li>
+<li>The IOP has a 3-level stack of interrupt/mode state. When an exception occurs, the current state
+is pushed to the stack, and a kernel mode, interrupt disabled state is pushed. At the end of a
+exception handler, the interrupt/mode state is popped from the stack, restoring it to the state
+before the exception.</li>
+</ul>
+<blockquote>
+<p>The only level 2 exception you need to care about is the Reset exception, and that's simply when
+your code starts executing, so you handle it anyway. The other three are reserved mostly for
+the PlayStation 2 development console, called the TOOL, where it would be useful to examine
+memory at a particular point in the program.</p>
+</blockquote>
+<blockquote>
+<p>Note that the processor does <em>not</em> save register state for you; you must do this yourself. For
+this purpose, MIPS ABIs reserve registers <code>$k0</code> and <code>$k1</code> for kernel exception bootstrapping.
+I suggest putting the kernel stack pointer in <code>$k0</code>, and using <code>$k1</code> as a scratch register.</p>
+</blockquote>
+<p>Got all that? No? I'll keep going then.</p>
+<a class="header" href="#exception-codes" id="exception-codes"><h2>Exception codes</h2></a>
+<p>Speaking of those exception codes, here they are (for both CPUs):</p>
+<ul>
+<li>0: Processor Interrupt (we'll cover these next chapter)</li>
+<li>1: TLB Modified (*)</li>
+<li>2: TLB Miss (Load) / TLB Invalid (Load) (*/**)</li>
+<li>3: TLB Miss (Store) / TLB Invalid (Store) (*/**)</li>
+<li>4: Address Error (Load)</li>
+<li>5: Address Error (Store)</li>
+<li>6: Bus Error (Instruction)</li>
+<li>7: Bus Error (Data)</li>
+<li>8: System Call (SYSCALL instruction)</li>
+<li>9: Breakpoint (BREAK instruction)</li>
+<li>10: Reserved Instruction</li>
+<li>11: Coprocessor Unusable</li>
+<li>12: Arithmetic Overflow</li>
+<li>13: Trap</li>
+</ul>
+<p>*: The TLB is not emulated by either PCSX2 or DobieStation, so you can safely stub them.
+**: TLB Miss exceptions go in their own handler to differentiate them from the others.</p>
+<blockquote>
+<p>Unlike x86, MIPS - at least the versions of MIPS we're using - has no double fault handler, so if
+you cause an exception in an exception handler, the processor will invoke the relevant exception
+handler again. If that's because you caused a bus error in the bus error exception handler, your
+code will infinitely loop. Be careful.</p>
+</blockquote>
+<blockquote>
+<p>Other MIPS processors would have an exception code for floating point exceptions, but the IOP
+does not have a floating point unit, and the EE's floating point unit does not raise exceptions.</p>
+</blockquote>
+<a class="header" href="#exception-handler-addresses" id="exception-handler-addresses"><h2>Exception handler addresses</h2></a>
+<p>Where these exception handlers go depends on the processor, and on a bit in Status called
+&quot;Bootstrap Exception Vectors&quot; (BEV) which is used for exception handlers in the ROM.</p>
+<blockquote>
+<p>I will use the physical address conventions for these memory addresses. Remember that
+<code>0000'0000</code> is the start of RAM, and <code>1FC0'0000</code> is the start of ROM.</p>
+</blockquote>
+<p>For the IOP:</p>
+<ul>
+<li>TLB Miss exceptions go to <code>1FC0'0100</code> in BEV mode, or <code>0000'0000</code> normally.</li>
+<li>All other exceptions go to <code>1FC0'0180</code> in BEV mode, or <code>0000'0080</code> normally.</li>
+</ul>
+<p>For the EE:</p>
+<ul>
+<li>TLB Miss exceptions go to <code>1FC0'0200</code> in BEV mode, or <code>0000'0000</code> normally.</li>
+<li>Performance Counter Overflow exceptions go to <code>1FC0'0280</code> in BEV mode, or <code>0000'0080</code> normally.</li>
+<li>Debug exceptions go to <code>1FC0'0300</code> in BEV mode, or <code>0000'0100</code> normally.</li>
+<li>Interrupt exceptions go to <code>1FC0'0400</code> in BEV mode, or <code>0000'0200</code> normally.</li>
+<li>All other exceptions go to <code>1FC0'0380</code> in BEV mode, or <code>0000'0180</code> normally.</li>
+</ul>
+<blockquote>
+<p>You may note that the EE's ROM exception handlers conveniently occur after the IOP's ROM
+exception handlers. It's one of the (few) advantages of the EE being a custom CPU.</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../md/2_2_iop_boot.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../md/2_2_iop_boot.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

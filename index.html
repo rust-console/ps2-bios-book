@@ -1,0 +1,259 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Putting The &quot;Mental&quot; In Fundamentals - Writing a PlayStation 2 BIOS in Rust</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="md/1_fundamentals.html"><strong aria-hidden="true">1.</strong> Putting The &quot;Mental&quot; In Fundamentals</a></li><li><ol class="section"><li><a href="md/1_1_target.html"><strong aria-hidden="true">1.1.</strong> Targets: Ready... Aim...</a></li></ol></li><li><a href="md/2_bootloader.html"><strong aria-hidden="true">2.</strong> Wellington Bootloader</a></li><li><ol class="section"><li><a href="md/2_1_ee_boot.html"><strong aria-hidden="true">2.1.</strong> Booting: An Emotional Experience</a></li><li><a href="md/2_2_iop_boot.html"><strong aria-hidden="true">2.2.</strong> Booting: Hell on Earth</a></li></ol></li><li><a href="md/3_exceptions.html"><strong aria-hidden="true">3.</strong> Every Rule Has An Exception...</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Writing a PlayStation 2 BIOS in Rust</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#i-putting-the-mental-in-fundamentals" id="i-putting-the-mental-in-fundamentals"><h1>I. Putting the &quot;Mental&quot; in &quot;Fundamentals&quot;</h1></a>
+<p>Welcome to this blog about writing a BIOS for PlayStation 2 emulators in Rust.</p>
+<p>By studying this process, you should get a greater appreciation of how much effort goes on behind
+the scenes to boot your computer.</p>
+<a class="header" href="#legals" id="legals"><h2>Legals</h2></a>
+<p>This book is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+The source code is licensed under the terms of the GNU General Public License version 3.0 or (at
+your option) any later version.</p>
+<a class="header" href="#the-ps2-architecture" id="the-ps2-architecture"><h2>The PS2 architecture</h2></a>
+<p>The PlayStation 2 is an unusually laid out computer compared to the Intel x86 PC or ARM
+phone/tablet you're probably reading this on.</p>
+<p>It has two CPUs in it, the R5900 contained in the Emotion Engine chip (this chip contains a lot
+of other processors, which is why I will call the CPU itself the R5900), and the R3051 contained
+in the Input/Output Processor. &quot;Emotion Engine&quot; and &quot;Input/Output Processor&quot; are quite long names,
+so I will call them the &quot;EE&quot; and &quot;IOP&quot; respectively.</p>
+<p>It also has a custom GPU called the Graphics Synthesizer, which I will call the &quot;GS&quot;.</p>
+<p>These are connected together like this:</p>
+<p><img src="/ps2-bios-book/svg/1_fundamentals_1.svg" alt="High level diagram showing the EE and IOP connected, and the EE and GS connected" /></p>
+<p>These CPUs both use the MIPS instruction set, though the IOP uses 32-bit MIPS I, and the EE
+uses 64-bit MIPS III.</p>
+<p>The EE is significantly faster than the IOP, so the IOP is used to offload slow tasks
+like input/output, and then notify the EE when something has happened through a communication
+link.</p>
+<p>Each of these chips has its own embedded memory; the EE has 32 MiB of system memory, the IOP has
+its own 2 MiB of memory, and the GS has 4 MiB of embedded memory.</p>
+<a class="header" href="#the-boot-process" id="the-boot-process"><h2>The boot process</h2></a>
+<p>The PS2 BIOS boot process at a very high level like this:</p>
+<ul>
+<li>Both CPUs start from same BIOS ROM.</li>
+<li>Figure out if you are the EE (Emotion Engine CPU) or the IOP (Input/Output Processor CPU).</li>
+<li>If you are the EE:
+<ul>
+<li>Load and run the EE kernel.</li>
+<li>Set up the processor and memory.</li>
+<li>Set up the EE side of the communication link.</li>
+<li>Synchronise with the IOP through it.</li>
+</ul>
+</li>
+<li>If you are the IOP:
+<ul>
+<li>Load and run the IOP kernel.</li>
+<li>Set up the processor and memory.</li>
+<li>Set up the IOP side of the communication link.</li>
+<li>Synchronise with the EE through it.</li>
+</ul>
+</li>
+<li>When both CPUs are set up and ready:
+<ul>
+<li>Play a pretty logo.</li>
+<li>Check if there is a disc in the drive.</li>
+<li>If there is, do something reasonable about it:
+<ul>
+<li>Run a PlayStation 2 game on the EE.</li>
+<li>Run a PlayStation 1 game on the IOP.</li>
+<li>Play a DVD or CD.</li>
+<li>Complain about an unrecognised disc.</li>
+</ul>
+</li>
+<li>If there isn't, load the BIOS interface.</li>
+</ul>
+</li>
+</ul>
+<p>And all of this in 4 megabytes of ROM. Quite impressive, isn't it?</p>
+<p>Now, since we are running on emulators, we can remove parts of this: people will watch DVDs
+and CDs with their media player of choice, and use a dedicated PlayStation 1 emulator for PS1
+games. That gives us a little extra room for debugging or fancy graphics if we desire.</p>
+<a class="header" href="#some-bad-news" id="some-bad-news"><h3>Some bad news</h3></a>
+<p>As of time of writing, LLVM - the code generator behind <code>rustc</code> - does not support the MIPS I
+instruction set, which the IOP uses. This means you can't use Rust on the IOP at present,
+unless you use MIPS II, which is a superset of the MIPS I instruction set. This carries risks of
+your code randomly breaking because LLVM decided to use an instruction not supported by the IOP,
+which I decided not to bother with. Still, I will document what the IOP Rust code <em>would</em> look
+like, if it had native support.</p>
+<p>Equally, the EE is a <em>quirky</em> chip which LLVM does not support directly, because it uses 64-bit
+pointers, while the EE only has a 32-bit address space. Fortunately, we can pretend that the
+EE is a 32-bit MIPS II CPU, which <em>is</em> supported by LLVM, and this is what we will do.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

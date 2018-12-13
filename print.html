@@ -1,0 +1,811 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Writing a PlayStation 2 BIOS in Rust</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="md/1_fundamentals.html"><strong aria-hidden="true">1.</strong> Putting The &quot;Mental&quot; In Fundamentals</a></li><li><ol class="section"><li><a href="md/1_1_target.html"><strong aria-hidden="true">1.1.</strong> Targets: Ready... Aim...</a></li></ol></li><li><a href="md/2_bootloader.html"><strong aria-hidden="true">2.</strong> Wellington Bootloader</a></li><li><ol class="section"><li><a href="md/2_1_ee_boot.html"><strong aria-hidden="true">2.1.</strong> Booting: An Emotional Experience</a></li><li><a href="md/2_2_iop_boot.html"><strong aria-hidden="true">2.2.</strong> Booting: Hell on Earth</a></li></ol></li><li><a href="md/3_exceptions.html"><strong aria-hidden="true">3.</strong> Every Rule Has An Exception...</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Writing a PlayStation 2 BIOS in Rust</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#i-putting-the-mental-in-fundamentals" id="i-putting-the-mental-in-fundamentals"><h1>I. Putting the &quot;Mental&quot; in &quot;Fundamentals&quot;</h1></a>
+<p>Welcome to this blog about writing a BIOS for PlayStation 2 emulators in Rust.</p>
+<p>By studying this process, you should get a greater appreciation of how much effort goes on behind
+the scenes to boot your computer.</p>
+<a class="header" href="#legals" id="legals"><h2>Legals</h2></a>
+<p>This book is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+The source code is licensed under the terms of the GNU General Public License version 3.0 or (at
+your option) any later version.</p>
+<a class="header" href="#the-ps2-architecture" id="the-ps2-architecture"><h2>The PS2 architecture</h2></a>
+<p>The PlayStation 2 is an unusually laid out computer compared to the Intel x86 PC or ARM
+phone/tablet you're probably reading this on.</p>
+<p>It has two CPUs in it, the R5900 contained in the Emotion Engine chip (this chip contains a lot
+of other processors, which is why I will call the CPU itself the R5900), and the R3051 contained
+in the Input/Output Processor. &quot;Emotion Engine&quot; and &quot;Input/Output Processor&quot; are quite long names,
+so I will call them the &quot;EE&quot; and &quot;IOP&quot; respectively.</p>
+<p>It also has a custom GPU called the Graphics Synthesizer, which I will call the &quot;GS&quot;.</p>
+<p>These are connected together like this:</p>
+<p><img src="/ps2-bios-book/svg/1_fundamentals_1.svg" alt="High level diagram showing the EE and IOP connected, and the EE and GS connected" /></p>
+<p>These CPUs both use the MIPS instruction set, though the IOP uses 32-bit MIPS I, and the EE
+uses 64-bit MIPS III.</p>
+<p>The EE is significantly faster than the IOP, so the IOP is used to offload slow tasks
+like input/output, and then notify the EE when something has happened through a communication
+link.</p>
+<p>Each of these chips has its own embedded memory; the EE has 32 MiB of system memory, the IOP has
+its own 2 MiB of memory, and the GS has 4 MiB of embedded memory.</p>
+<a class="header" href="#the-boot-process" id="the-boot-process"><h2>The boot process</h2></a>
+<p>The PS2 BIOS boot process at a very high level like this:</p>
+<ul>
+<li>Both CPUs start from same BIOS ROM.</li>
+<li>Figure out if you are the EE (Emotion Engine CPU) or the IOP (Input/Output Processor CPU).</li>
+<li>If you are the EE:
+<ul>
+<li>Load and run the EE kernel.</li>
+<li>Set up the processor and memory.</li>
+<li>Set up the EE side of the communication link.</li>
+<li>Synchronise with the IOP through it.</li>
+</ul>
+</li>
+<li>If you are the IOP:
+<ul>
+<li>Load and run the IOP kernel.</li>
+<li>Set up the processor and memory.</li>
+<li>Set up the IOP side of the communication link.</li>
+<li>Synchronise with the EE through it.</li>
+</ul>
+</li>
+<li>When both CPUs are set up and ready:
+<ul>
+<li>Play a pretty logo.</li>
+<li>Check if there is a disc in the drive.</li>
+<li>If there is, do something reasonable about it:
+<ul>
+<li>Run a PlayStation 2 game on the EE.</li>
+<li>Run a PlayStation 1 game on the IOP.</li>
+<li>Play a DVD or CD.</li>
+<li>Complain about an unrecognised disc.</li>
+</ul>
+</li>
+<li>If there isn't, load the BIOS interface.</li>
+</ul>
+</li>
+</ul>
+<p>And all of this in 4 megabytes of ROM. Quite impressive, isn't it?</p>
+<p>Now, since we are running on emulators, we can remove parts of this: people will watch DVDs
+and CDs with their media player of choice, and use a dedicated PlayStation 1 emulator for PS1
+games. That gives us a little extra room for debugging or fancy graphics if we desire.</p>
+<a class="header" href="#some-bad-news" id="some-bad-news"><h3>Some bad news</h3></a>
+<p>As of time of writing, LLVM - the code generator behind <code>rustc</code> - does not support the MIPS I
+instruction set, which the IOP uses. This means you can't use Rust on the IOP at present,
+unless you use MIPS II, which is a superset of the MIPS I instruction set. This carries risks of
+your code randomly breaking because LLVM decided to use an instruction not supported by the IOP,
+which I decided not to bother with. Still, I will document what the IOP Rust code <em>would</em> look
+like, if it had native support.</p>
+<p>Equally, the EE is a <em>quirky</em> chip which LLVM does not support directly, because it uses 64-bit
+pointers, while the EE only has a 32-bit address space. Fortunately, we can pretend that the
+EE is a 32-bit MIPS II CPU, which <em>is</em> supported by LLVM, and this is what we will do.</p>
+<a class="header" href="#i-targets-ready-aim" id="i-targets-ready-aim"><h1>I. Targets: Ready... Aim...</h1></a>
+<p>If we tried to compile something right now, Rust would probably spit out an x86 ELF/Mach-O/PE
+executable. It wouldn't run for a few reasons:</p>
+<ul>
+<li>The PlayStation 2 doesn't understand these formats; it'd just try to execute it as a binary blob
+and trip up on their magic numbers.</li>
+<li>Even if it did understand these files, they would be targeted for the wrong architecture.</li>
+</ul>
+<p>Rust needs to be told how to emit code for the PS2. For that we need to define a <em>target file</em>.</p>
+<a class="header" href="#target-files" id="target-files"><h2>Target files</h2></a>
+<p><code>rustc</code> includes its own target files for each architecture; you can look at the available targets
+with the following command:</p>
+<pre><code>rustc --print target-list
+</code></pre>
+<p>Each target file is in a JSON format, that you can inspect with the following command:</p>
+<pre><code>rustc -Z unstable-options --print target-spec-json --target $target
+</code></pre>
+<p>For the EE, we'll start off the <code>mipsel-unknown-linux-gnu</code> target, which looks like this:</p>
+<pre><code class="language-json">{
+  &quot;arch&quot;: &quot;mips&quot;,
+  &quot;cpu&quot;: &quot;mips32r2&quot;,
+  &quot;data-layout&quot;: &quot;e-m:m-p:32:32-i8:8:32-i16:16:32-i64:64-n32-S64&quot;,
+  &quot;dynamic-linking&quot;: true,
+  &quot;env&quot;: &quot;gnu&quot;,
+  &quot;executables&quot;: true,
+  &quot;features&quot;: &quot;+mips32r2,+fpxx,+nooddspreg&quot;,
+  &quot;has-elf-tls&quot;: true,
+  &quot;has-rpath&quot;: true,
+  &quot;is-builtin&quot;: true,
+  &quot;linker-flavor&quot;: &quot;gcc&quot;,
+  &quot;linker-is-gnu&quot;: true,
+  &quot;llvm-target&quot;: &quot;mipsel-unknown-linux-gnu&quot;,
+  &quot;max-atomic-width&quot;: 32,
+  &quot;os&quot;: &quot;linux&quot;,
+  &quot;position-independent-executables&quot;: true,
+  &quot;pre-link-args&quot;: {
+    &quot;gcc&quot;: [
+      &quot;-Wl,--as-needed&quot;,
+      &quot;-Wl,-z,noexecstack&quot;
+    ]
+  },
+  &quot;relro-level&quot;: &quot;full&quot;,
+  &quot;target-c-int-width&quot;: &quot;32&quot;,
+  &quot;target-endian&quot;: &quot;little&quot;,
+  &quot;target-family&quot;: &quot;unix&quot;,
+  &quot;target-pointer-width&quot;: &quot;32&quot;,
+  &quot;vendor&quot;: &quot;unknown&quot;
+}
+</code></pre>
+<p>This contains a lot of unnecessary (and inaccurate) things, such as this target being for MIPS32r2.
+Let's change it a bit.</p>
+<pre><code class="language-json">{
+  &quot;arch&quot;: &quot;mips&quot;,
+  &quot;cpu&quot;: &quot;mips2&quot;,
+  &quot;data-layout&quot;: &quot;e-m:m-p:32:32-i8:8:32-i16:16:32-i64:64-n32-S64&quot;,
+  &quot;dynamic-linking&quot;: false,
+  &quot;executables&quot;: true,
+  &quot;features&quot;: &quot;+mips2&quot;,
+  &quot;linker&quot;: &quot;mipsel-none-elf-ld&quot;,
+  &quot;linker-flavor&quot;: &quot;ld&quot;,
+  &quot;llvm-target&quot;: &quot;mipsel-none-elf&quot;,
+  &quot;llvm-args&quot;: &quot;-mxgot&quot;,
+  &quot;max-atomic-width&quot;: 32,
+  &quot;os&quot;: &quot;none&quot;,
+  &quot;panic-strategy&quot;: &quot;abort&quot;,
+  &quot;position-independent-executables&quot;: false,
+  &quot;relro-level&quot;: &quot;full&quot;,
+  &quot;soft-float&quot;: true,
+  &quot;target-c-int-width&quot;: &quot;32&quot;,
+  &quot;target-endian&quot;: &quot;little&quot;,
+  &quot;target-family&quot;: &quot;unix&quot;,
+  &quot;target-pointer-width&quot;: &quot;32&quot;,
+  &quot;vendor&quot;: &quot;unknown&quot;
+}
+</code></pre>
+<p>Some important changes:</p>
+<ul>
+<li><code>&quot;cpu&quot;: &quot;mips2&quot;</code> - We need LLVM to target the MIPS II instruction set.</li>
+<li><code>&quot;soft-float&quot;: true</code> - The R5900 has a single-float FPU, which LLVM has quite a few bugs with, so
+we pretend it doesn't have one to work around them.</li>
+<li><code>&quot;linker&quot;: &quot;mipsel-none-elf-ld&quot;</code>/<code>&quot;linker-flavor&quot;: &quot;ld&quot;</code> - We will need to use the GNU linker to
+build this, because LLD seems to have a nasty habit of optimising out our code.</li>
+</ul>
+<blockquote>
+<p>The correct settings here would be <code>&quot;cpu&quot;: &quot;mips3&quot;</code> for the R5900 and <code>&quot;cpu&quot;: &quot;mips1&quot;</code> for the
+R3051, but as mentioned previously, LLVM support for these needs to mature.</p>
+</blockquote>
+<p>I will refer to this target file as <code>ee.json</code>, and you should put it in your crate/workspace root.</p>
+<a class="header" href="#building-cross-binutils" id="building-cross-binutils"><h2>Building cross binutils</h2></a>
+<blockquote>
+<p>This isn't directly Rust related, but we need a linker for our code, and binutils has proven to
+be very reliable in my experiments. One day, I hope LLD is stable enough to use.</p>
+</blockquote>
+<p>You'll need a GNU-compatible host C compiler (<code>gcc</code>/<code>clang</code> will do fine, but not MSVC++), and a
+copy of the <a href="https://ftp.gnu.org/gnu/binutils/">binutils source</a>. I'm using binutils 2.31.</p>
+<p>After extracting your source, you can build it with a standard-ish method:</p>
+<pre><code>mkdir build
+cd build
+../configure --target=&quot;mipsel-none-elf&quot; 
+make
+sudo make install
+</code></pre>
+<p>And then you can test it installed correctly by running <code>mipsel-none-elf-ld --version</code>.</p>
+<a class="header" href="#one-final-thing" id="one-final-thing"><h2>One final thing</h2></a>
+<p>To get <code>rustc</code> to build for a native target, we use <code>cargo build</code>; but Cargo doesn't currently
+work well with cross-compilation, because it expects the various libraries to be already installed.</p>
+<blockquote>
+<p>This may change with std-aware Cargo.</p>
+</blockquote>
+<p>We can get around this through the <code>cargo-xbuild</code> wrapper, which you can grab with a simple <code>cargo install cargo-xbuild</code>. This allows you to build your code with <code>cargo xbuild --target ee.json</code>, and
+also wraps Clippy.</p>
+<blockquote>
+<p>Don't forget the <code>.json</code> for <code>--target</code>; I had some problems where it would build your code fine
+without it (i.e. <code>--target ee</code>), but fail to build any library crates your code depended on.</p>
+</blockquote>
+<a class="header" href="#ii-wellington-bootloader" id="ii-wellington-bootloader"><h1>II. Wellington Bootloader</h1></a>
+<blockquote>
+<p>This chapter to written to show you what <em>would</em> be possible with compiler support. However, it
+does talk about the architecture of MIPS, and you'll need it later.</p>
+</blockquote>
+<p>Remember the <a href="/ps2-bios-book/md/1_fundamentals.html#the-boot-process">steps to boot the console</a>? Let's put
+those into action.</p>
+<a class="header" href="#both-cpus-start-from-the-same-bios-rom" id="both-cpus-start-from-the-same-bios-rom"><h2>&quot;Both CPUs start from the same BIOS ROM&quot;</h2></a>
+<p>Both CPUs start at the same fixed address in the virtual memory space: <code>BFC0'0000</code>, the start of
+BIOS ROM.</p>
+<blockquote>
+<p>Both CPUs effectively mask the virtual address with <code>1FFF'FFFF</code>. This results in <code>BFC0'0000</code>
+being mapped to <code>1FC0'0000</code> by both chips; the two addresses are interchangeable and reference the
+same data. As you will see later, <code>BFC0'0000</code> seems to have practical problems in binutils (it
+seems like the pointer is treated as signed, leading to strange behaviour), so I will often refer
+to <code>1FC0'0000</code>, which does not have these issues.</p>
+</blockquote>
+<blockquote>
+<p>Also worth mentioning is that in MIPS, everything with the virtual <code>8000'0000</code> bit set is kernel
+memory space and everything without it set is user memory. This is a mostly theoretical
+distinction when working with a bare metal MIPS target like the PlayStation 2 though, because the
+console is almost always in kernel mode when playing a game.</p>
+</blockquote>
+<a class="header" href="#figure-out-if-you-are-the-ee-or-iop" id="figure-out-if-you-are-the-ee-or-iop"><h2>&quot;Figure out if you are the EE or IOP&quot;</h2></a>
+<p>MIPS has a 4 coprocessor interface baked into the ISA; this provides a standard method of accessing
+custom features of each chip without needing a new assembler for each of them. These coprocessors
+were left defined but unspecified, however MIPS has conventions for them:</p>
+<ul>
+<li>Coprocessor 0 (COP0) is the system control coprocessor; essentially a set of registers containing
+processor state. Because it contains such important information, it is mandatory and found in all
+MIPS processors.</li>
+<li>Coprocessor 1 (COP1) is the floating point unit, and all floating point math goes through it. The
+IOP does not have a floating point unit, and the EE's floating point unit is very nonstandard, which
+is why our code doesn't use them.</li>
+<li>Coprocessor 2 (COP2) is left for custom accelerators, and both the EE and IOP use them.</li>
+<li>Coprocessor 3 was originally for more custom accelerators, but it got repurposed into more
+floating point operations. Neither CPU has this coprocessor.</li>
+</ul>
+<p>We will need COP0 for this, and it too has conventions for register names and contents, although
+not specifically what the register contains. The specific register we need is COP0 register 15,
+which has the mnemonic &quot;PRid&quot; for &quot;Processor Identification&quot;.</p>
+<p>The PRid register looks like ths in both CPUs:</p>
+<p><em>[fancy diagram showing the least significant byte being marked &quot;revision number&quot; and the second
+least significant byte being marked &quot;model number&quot;; the other bytes are &quot;reserved&quot;]</em></p>
+<p>On the EE, the model number is <code>0x2E</code>, while on the IOP the model number is <code>0x00</code> (it was a much
+earlier core), which means we just need to check what the model number field is and jump to the
+appropriate function.</p>
+<p>To get a register from coprocessor 0, we use <code>mfc0 &lt;dest reg&gt; &lt;cop0 reg&gt;</code>.</p>
+<p>So we could write a function that looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#![no_std]
+#![no_main]
+#![feature(asm)]
+
+#fn main() {
+mod cop0 {
+    pub fn prid() -&gt; u32 {
+        let prid;
+        unsafe { asm!(&quot;mfc0 $0, $$15&quot; : &quot;=r&quot; (prid)) };
+        prid
+    }
+}
+
+fn ee_setup() -&gt; ! {
+    unimplemented!(&quot;EE code goes here&quot;);
+}
+
+fn iop_setup() -&gt; ! {
+    unimplemented!(&quot;IOP code goes here&quot;);
+}
+
+fn _start() -&gt; ! {
+    let prid = cop0::prid();
+    let model = prid &amp; 0xFF00;
+
+    match model {
+        0x2E00 =&gt; ee_setup(),
+        0x0000 =&gt; iop_setup(),
+        _ =&gt; unimplemented!(&quot;Couldn't detect host processor&quot;),
+    }
+}
+
+#}</code></pre></pre>
+<blockquote>
+<p>If we could compile code for the IOP, anyway. Note that it won't compile on the Rust Playground
+because the Playground runs on x86.</p>
+</blockquote>
+<a class="header" href="#load-and-run-the-eeiop-kernel" id="load-and-run-the-eeiop-kernel"><h2>&quot;Load and run the EE/IOP kernel&quot;</h2></a>
+<p>Here's where things become a little painful.</p>
+<a class="header" href="#ii-ee-booting-an-emotional-experience" id="ii-ee-booting-an-emotional-experience"><h1>II. EE Booting: An Emotional Experience</h1></a>
+<p>The EE kernel gets a megabyte of reserved memory - specifically from <code>0000'0000</code> to <code>0010'0000</code>. In
+that megabyte, you need to store the library of system calls that the kernel provides, and act on
+outside events.</p>
+<p>To start the EE kernel we need to first load it from ROM, putting specific parts of the ROM in
+particular places in RAM.</p>
+<p>If only there was a convenient, standard format for loading data into a specific location in
+memory.</p>
+<a class="header" href="#magical-elves" id="magical-elves"><h2>Magical elves</h2></a>
+<p>Fortunately, there is: the Executable and Linkable Format, or ELF.</p>
+<blockquote>
+<p>The following paragraph is a lie that I will change at some point: I will need to discuss how to
+parse ELF, because the IOP kernel depends on it.</p>
+</blockquote>
+<p>I'm not going to go into much detail about how to implement ELF loading, because the
+<a href="https://refspecs.linuxfoundation.org/elf/elf.pdf">specification</a> is easy enough to understand,
+plus there are <a href="https://wiki.osdev.org/ELF#Loading_ELF_Binaries">guides</a> for writing homebrew ELF
+loaders, and even <a href="https://crates.io/search?q=elf">crates</a> for it.</p>
+<p>But all of these must get their ELF data from somewhere.</p>
+<p>The naive solution is to append the ELF to the ROM at a fixed address. A more efficient format
+called &quot;ROMDIR&quot; will be discussed later; PCSX2 requires that format to recognise your ROM as valid.
+Fortunately, DobieStation is not as picky, and we will use that for testing.</p>
+<a class="header" href="#stick-to-the-script" id="stick-to-the-script"><h2>Stick to the script</h2></a>
+<p>The ELF that you compile needs certain functions at specific addresses to handle MIPS exceptions.
+I will explain them later, but for now, your kernel should leave the area from <code>0000'0000</code> until
+<code>0000'0280</code> clean. To do this, we need to tell the linker not to put data there through a linker
+script.</p>
+<blockquote>
+<p>We also need to do this for the bootloader, before you ask.</p>
+</blockquote>
+<p>A linker script contains two main parts: we need to tell the linker where we start executing code
+from, and where to put code/data.</p>
+<p>We tell the linker where to execute code by telling it which symbol to treat as the start of the
+program. This is the <code>START(&lt;symbol&gt;)</code> command.</p>
+<p>We tell the linker where to put code/data using the <code>SECTIONS</code> command. <code>SECTIONS</code> is a block of,
+well, program sections, such as <code>.text</code> (your code), <code>.data</code> (global variables) and <code>.bss</code> (zeroed
+global variables, taking up no binary space).</p>
+<p>The easiest solution is to just tell the linker to offset your code by <code>0x280</code> bytes.</p>
+<pre><code class="language-ld">/* Set the start point to _start */
+START(_start);
+
+/* The sections of the program */
+SECTIONS {
+    /* &quot;section : address&quot; means &quot;start section at address&quot; */
+    .text : 0x00000000 {
+        /* 
+         * &quot;.&quot; refers to the current memory pointer. In this case, &quot;. = foo&quot; sets the current
+         * memory pointer to `foo + address` (see above).
+         */
+        . = 0x280;
+
+        /* Then include all symbols in .text and its subsections. */
+        *(.text .text.*);
+    }
+
+    /* Without the address, the linker just aligns it after the end of the previous section. */
+    .data : {
+        *(.data .data.*);
+    }
+
+    .bss : {
+        *(.bss .bss.*);
+    }
+}
+</code></pre>
+<p>And then we can use this for a very, very simplistic program.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#![no_std]
+#![no_main]
+
+#fn main() {
+#[no_mangle]
+fn _start() -&gt; ! {
+    loop {}
+}
+
+#}</code></pre></pre>
+<a class="header" href="#ii-iop-booting-hell-on-earth" id="ii-iop-booting-hell-on-earth"><h1>II. IOP Booting: Hell on Earth</h1></a>
+<blockquote>
+<p>This page is a work in progress; I'm not happy with it so far, but the information has to be
+put down somewhere before it can be made pretty.</p>
+</blockquote>
+<p>The IOP kernel has a <em>unique</em>, modular architecture, based around relocatable ELF modules called
+&quot;IOP Relocatable Executables&quot;, or &quot;IRX&quot;es. This makes it microkernel-esque, but with no userspace.</p>
+<p>So, you could use your ELF parser for the bootloader for the IOP too, right?</p>
+<p>Not without accomodating the quirks of the IRX format.</p>
+<a class="header" href="#the-iopmod-section" id="the-iopmod-section"><h2>The <code>.iopmod</code> section</h2></a>
+<p>First of all, the IRX uses a header that a common sense ELF parser would reject as invalid
+(possibly intentionally): it uses the &quot;Processor Specific&quot; region of ELF types, as opposed to the
+standardised formats between 1 and 4. This custom header used to detect an IRX file.</p>
+<p>Each IRX has a specific section - <code>.iopmod</code> (section number <code>0x70000080</code>) - which contains an IRX's
+metadata, which looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+/// `.iopmod` section
+#[repr(C)]
+pub struct Metadata {
+    /// &quot;module structure&quot; pointer
+    module: usize,
+    /// Start offset, relative to the beginning of the executable.
+    start: usize,
+    /// Heap start
+    heap: usize,
+    /// Text section size
+    text_size: usize,
+    /// Data section size
+    data_size: usize,
+    /// BSS section size
+    bss_size: usize,
+    /// Major/minor version in binary coded decimal, e.g. 0x0102 for 1.2.
+    version: u32,
+    /// Module name
+    name: [u8; 8],
+}
+
+/// The IOP module metadata.
+///
+/// The 0xDEADBEEF magic numbers indicate data fields that will be changed after compile.
+#[link_section = &quot;.iopmod&quot;]
+static IOPMOD: Metadata = Metadata {
+    module: 0xDEADBEEF,
+    start: 0xDEADBEEF,
+    heap: 0xDEADBEEF,
+    text_size: 0xDEADBEEF,
+    data_size: 0xDEADBEEF,
+    bss_size: 0xDEADBEEF,
+    version: 0x0100,
+    name: *b&quot;Example\0&quot;,
+};
+#}</code></pre></pre>
+<p>Searching for this data requires combing through the ELF section table until you find an entry with
+the name <code>.iopmod</code>. If you don't find this entry, it's probably an invalid IRX.</p>
+<a class="header" href="#the-irx-export-table" id="the-irx-export-table"><h2>The IRX export table</h2></a>
+<p>IRX modules contain an export table, which lists the functions that the IRX module provides. This
+table looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+/// An IRX export table.
+#[repr(C)]
+struct Export {
+    /// Magic number 0x41c0'0000, used for recognising the export table.
+    magic: u32,
+    /// Always zero. If this isn't zero, it's possibly a false positive.
+    zero: u32,
+    /// Version in binary-coded decimal.
+    version: u32,
+    /// Name of this module.
+    name: [u8; 8],
+    /// Offsets of exported functions, terminated with a zero reference.
+    exports: [usize],
+}
+#}</code></pre></pre>
+<p>Searching for the export table involves searching for the export table magic number <code>41C0'0000</code>
+(chosen because it isn't a valid MIPS instruction), and then parsing the table as above.</p>
+<blockquote>
+<p>I've encoded the export number into the struct, but I'm not sure how to parse a table into this.</p>
+</blockquote>
+<a class="header" href="#the-irx-import-table" id="the-irx-import-table"><h2>The IRX import table</h2></a>
+<p>IRX modules can contain arbitrarily many module import tables, which list the numbered functions
+the module requires. This table looks like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+/// An IRX function stub.
+#[repr(C)]
+struct FunctionStub {
+    /// Jump instruction.
+    jump: u32,
+    /// Function number.
+    func: u32,
+}
+
+/// An IRX import table.
+#[repr(C)]
+struct Import {
+    /// Magic number 0x41e0'0000, used for recognising the import table.
+    magic: u32,
+    /// Always zero. If this isn't zero, it's possibly a false positive.
+    zero: u32,
+    /// Version of the module in binary-coded decimal.
+    version: u32,
+    /// Name of the module.
+    name: [u8; 8],
+    /// Imported function stub, followed by an all-zero stub.
+    stubs: [FunctionStub],
+}
+#}</code></pre></pre>
+<p>Each stub is a very minimal two-instruction &quot;do nothing&quot; function that looks like this in the
+assembly:</p>
+<pre><code>03e00008        jr      $ra             # Return to caller
+240000NN        li      $zero,NN        # Write to an always-zero register the function reference.
+</code></pre>
+<blockquote>
+<p><code>li</code> is actually a pseudo-instruction. The actual instruction there is <code>addiu $zero, $zero, NN</code>,
+but adding zero to an number is the same as putting that number in the destination register.</p>
+</blockquote>
+<blockquote>
+<p>For this section you will need to know the encodings of the <code>j</code>, <code>jr</code> and <code>addiu</code> instructions,
+which are:</p>
+</blockquote>
+<p>[fancy diagram marked <code>J - jump to address</code> with the leftmost six bits as <code>000010</code>, and the other
+26 bits marked as &quot;absolute address&quot;]</p>
+<p>Since each MIPS instruction is four-byte aligned, the address is right-shifted by two bits, giving
+a total of a 2^28 byte jump address.</p>
+<p>As an example, to jump to the address <code>0321'1234</code>, you shift right the address by two bits to get
+<code>000C'848D</code>, AND the address with <code>07FF'FFFF</code> to clear the six most significant bits, and then OR
+in the six most significant bits of the <code>j</code> opcode (<code>0800'0000</code>) to produce <code>080C'848D</code>.</p>
+<p>[fancy diagram marked <code>JR - jump to register</code> with the leftmost six bits all zero, the next five
+bits marked as &quot;source register&quot;, the next 15 bits all zero, and the rightmost six bits as
+<code>001000</code>]</p>
+<p>[fancy diagram marked <code>ADDIU - add immediate without overflow</code> with the leftmost six bits as
+<code>001001</code>, the next five bits marked as &quot;source register&quot;, the next five bits marked as
+&quot;destination register&quot;, and the 16 rightmost bits marked as &quot;signed immediate&quot;]</p>
+<p>When an IRX is loaded into memory, you will need to overwrite the <code>jr $ra</code> stubs with <code>j &lt;addr&gt;</code>
+instructions. This means you will need to keep track of the function addresses, or alternatively
+look them up again after storing the module start and end addresses.</p>
+<p>The index of the function address is given in the least significant byte of the following
+<code>li $zero, NN</code> instruction, for the module listed in the import table's module name.</p>
+<blockquote>
+<p>I'm well aware this is quite messy and possibly explained badly.</p>
+</blockquote>
+<p>III. Every Rule Has An Exception...</p>
+<blockquote>
+<p>This post is kind of an information dump; it'll be needed for the next chapter when we actually
+write some exception handlers.</p>
+</blockquote>
+<p>When something sufficiently unusual happens, a processor will raise an exception for the kernel to
+deal with. Each architecture handles them differently; Philipp Opperman has an
+<a href="https://os.phil-opp.com/cpu-exceptions/">excellent post</a> about how x86 handles exceptions through
+its Interrupt Descriptor Table, and the Embedded Rust Book has a
+<a href="https://rust-embedded.github.io/book/start/exceptions.html">section</a> about using the <code>cortex-m</code>
+crate family for handling ARM exceptions.</p>
+<p>Both x86 and ARM use tables of function pointers at a fixed location in memory, with additional
+bells and whistles for x86 such as interrupt stacks. MIPS takes a different approach, which
+simplifies processor exception handling, but makes software a bit more complex.</p>
+<p>In MIPS, you get a 32 instruction area to store an exception handler. The specific location and
+handler types depend on the processor, but they are located near the beginning of ROM or RAM,
+depending on a configuration bit.</p>
+<p>This limited space means your handler will usually use a jump table to handle exceptions, and the
+coprocessor registers are designed with this in mind: the exception code in COP0 register 13
+occupies bits 7 to 2, which makes loading the relevant offset from a table of addresses a simple
+AND instruction.</p>
+<p>Additionally, MIPS uses a dedicated handler for a commonly occurring exception - &quot;TLB Miss&quot;,
+where the processor doesn't know how to map a virtual memory address to physical memory address -
+which speeds up exception handling in that situation.</p>
+<a class="header" href="#exception-handling-process" id="exception-handling-process"><h2>Exception handling process</h2></a>
+<p>When an exception occurs:</p>
+<ul>
+<li>The processor switches to kernel mode.</li>
+<li>The exception code is written to part of COP0 register 13 (the exception cause register, or
+Cause).</li>
+<li>The current program counter is written to COP0 register 14 (the exception program counter, or
+EPC). If the exception happened in a branch delay slot (very rare), the previous instruction
+program counter is written instead and a branch delay bit is set in Cause.</li>
+<li>If the exception is related to memory, the address that caused it is written to COP0 register
+8 (the bad virtual address register, or BadVAddr).</li>
+<li>The processor then jumps to a fixed address in memory that depends on the exception and chip,
+and starts executing code there.</li>
+</ul>
+<p>Additionally:</p>
+<ul>
+<li>The EE sets an exception indicator bit in COP0 register 12 (processor status, or Status).</li>
+<li>The EE has multiple levels of exceptions: &quot;level 1 exceptions&quot; are the ones we're going to talk
+about, but there are also &quot;level 2 exceptions&quot;, which include processor reset, non-maskable
+interrupts, performance counter overflow and debug exceptions.</li>
+<li>The IOP has a 3-level stack of interrupt/mode state. When an exception occurs, the current state
+is pushed to the stack, and a kernel mode, interrupt disabled state is pushed. At the end of a
+exception handler, the interrupt/mode state is popped from the stack, restoring it to the state
+before the exception.</li>
+</ul>
+<blockquote>
+<p>The only level 2 exception you need to care about is the Reset exception, and that's simply when
+your code starts executing, so you handle it anyway. The other three are reserved mostly for
+the PlayStation 2 development console, called the TOOL, where it would be useful to examine
+memory at a particular point in the program.</p>
+</blockquote>
+<blockquote>
+<p>Note that the processor does <em>not</em> save register state for you; you must do this yourself. For
+this purpose, MIPS ABIs reserve registers <code>$k0</code> and <code>$k1</code> for kernel exception bootstrapping.
+I suggest putting the kernel stack pointer in <code>$k0</code>, and using <code>$k1</code> as a scratch register.</p>
+</blockquote>
+<p>Got all that? No? I'll keep going then.</p>
+<a class="header" href="#exception-codes" id="exception-codes"><h2>Exception codes</h2></a>
+<p>Speaking of those exception codes, here they are (for both CPUs):</p>
+<ul>
+<li>0: Processor Interrupt (we'll cover these next chapter)</li>
+<li>1: TLB Modified (*)</li>
+<li>2: TLB Miss (Load) / TLB Invalid (Load) (*/**)</li>
+<li>3: TLB Miss (Store) / TLB Invalid (Store) (*/**)</li>
+<li>4: Address Error (Load)</li>
+<li>5: Address Error (Store)</li>
+<li>6: Bus Error (Instruction)</li>
+<li>7: Bus Error (Data)</li>
+<li>8: System Call (SYSCALL instruction)</li>
+<li>9: Breakpoint (BREAK instruction)</li>
+<li>10: Reserved Instruction</li>
+<li>11: Coprocessor Unusable</li>
+<li>12: Arithmetic Overflow</li>
+<li>13: Trap</li>
+</ul>
+<p>*: The TLB is not emulated by either PCSX2 or DobieStation, so you can safely stub them.
+**: TLB Miss exceptions go in their own handler to differentiate them from the others.</p>
+<blockquote>
+<p>Unlike x86, MIPS - at least the versions of MIPS we're using - has no double fault handler, so if
+you cause an exception in an exception handler, the processor will invoke the relevant exception
+handler again. If that's because you caused a bus error in the bus error exception handler, your
+code will infinitely loop. Be careful.</p>
+</blockquote>
+<blockquote>
+<p>Other MIPS processors would have an exception code for floating point exceptions, but the IOP
+does not have a floating point unit, and the EE's floating point unit does not raise exceptions.</p>
+</blockquote>
+<a class="header" href="#exception-handler-addresses" id="exception-handler-addresses"><h2>Exception handler addresses</h2></a>
+<p>Where these exception handlers go depends on the processor, and on a bit in Status called
+&quot;Bootstrap Exception Vectors&quot; (BEV) which is used for exception handlers in the ROM.</p>
+<blockquote>
+<p>I will use the physical address conventions for these memory addresses. Remember that
+<code>0000'0000</code> is the start of RAM, and <code>1FC0'0000</code> is the start of ROM.</p>
+</blockquote>
+<p>For the IOP:</p>
+<ul>
+<li>TLB Miss exceptions go to <code>1FC0'0100</code> in BEV mode, or <code>0000'0000</code> normally.</li>
+<li>All other exceptions go to <code>1FC0'0180</code> in BEV mode, or <code>0000'0080</code> normally.</li>
+</ul>
+<p>For the EE:</p>
+<ul>
+<li>TLB Miss exceptions go to <code>1FC0'0200</code> in BEV mode, or <code>0000'0000</code> normally.</li>
+<li>Performance Counter Overflow exceptions go to <code>1FC0'0280</code> in BEV mode, or <code>0000'0080</code> normally.</li>
+<li>Debug exceptions go to <code>1FC0'0300</code> in BEV mode, or <code>0000'0100</code> normally.</li>
+<li>Interrupt exceptions go to <code>1FC0'0400</code> in BEV mode, or <code>0000'0200</code> normally.</li>
+<li>All other exceptions go to <code>1FC0'0380</code> in BEV mode, or <code>0000'0180</code> normally.</li>
+</ul>
+<blockquote>
+<p>You may note that the EE's ROM exception handlers conveniently occur after the IOP's ROM
+exception handlers. It's one of the (few) advantages of the EE being a custom CPU.</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>
