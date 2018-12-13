@@ -4,7 +4,7 @@
 > put down somewhere before it can be made pretty.
 
 The IOP kernel has a *unique*, modular architecture, based around relocatable ELF modules called
-"IOP Relocatable Executables", or "IRX"es.
+"IOP Relocatable Executables", or "IRX"es. This makes it microkernel-esque, but with no userspace.
 
 So, you could use your ELF parser for the bootloader for the IOP too, right?
 
@@ -14,7 +14,7 @@ Not without accomodating the quirks of the IRX format.
 
 First of all, the IRX uses a header that a common sense ELF parser would reject as invalid
 (possibly intentionally): it uses the "Processor Specific" region of ELF types, as opposed to the
-standardised formats between 1 and 4. This can be used to detect an IRX file.
+standardised formats between 1 and 4. This custom header used to detect an IRX file.
 
 Each IRX has a specific section - `.iopmod` (section number `0x70000080`) - which contains an IRX's
 metadata, which looks like this:
@@ -25,7 +25,7 @@ metadata, which looks like this:
 pub struct Metadata {
     /// "module structure" pointer
     module: usize,
-    /// Start address
+    /// Start offset, relative to the beginning of the executable.
     start: usize,
     /// Heap start
     heap: usize,
@@ -41,7 +41,9 @@ pub struct Metadata {
     name: [u8; 8],
 }
 
-/// The IOP module metadata, mostly filled in after compile.
+/// The IOP module metadata.
+///
+/// The 0xDEADBEEF magic numbers indicate data fields that will be changed after compile.
 #[link_section = ".iopmod"]
 static IOPMOD: Metadata = Metadata {
     module: 0xDEADBEEF,
@@ -66,7 +68,7 @@ table looks like this:
 ```rust
 /// An IRX export table.
 #[repr(C)]
-struct Export<N> {
+struct Export {
     /// Magic number 0x41c0'0000, used for recognising the export table.
     magic: u32,
     /// Always zero. If this isn't zero, it's possibly a false positive.
@@ -75,8 +77,8 @@ struct Export<N> {
     version: u32,
     /// Name of this module.
     name: [u8; 8],
-    /// Addresses of exported functions, terminated with a zero reference.
-    exports: [usize; N],
+    /// Offsets of exported functions, terminated with a zero reference.
+    exports: [usize],
 }
 ```
 
@@ -102,7 +104,7 @@ struct FunctionStub {
 
 /// An IRX import table.
 #[repr(C)]
-struct Import<N> {
+struct Import {
     /// Magic number 0x41e0'0000, used for recognising the import table.
     magic: u32,
     /// Always zero. If this isn't zero, it's possibly a false positive.
@@ -112,7 +114,7 @@ struct Import<N> {
     /// Name of the module.
     name: [u8; 8],
     /// Imported function stub, followed by an all-zero stub.
-    stubs: [FunctionStub; N],
+    stubs: [FunctionStub],
 }
 ```
 
@@ -120,18 +122,37 @@ Each stub is a very minimal two-instruction "do nothing" function that looks lik
 assembly:
 
 ```
-03e00008        jr      $ra       # Return to caller
-240000NN        li      $zero,NN  # Write to an always-zero register the function reference.
+03e00008        jr      $ra             # Return to caller
+240000NN        li      $zero,NN        # Write to an always-zero register the function reference.
 ```
 
-From there you will need to overwrite the `jr $ra` instruction with a `j <addr>` instruction.
-The `j` opcode has its six most significant bits as `000010`, and the rest of the instruction is
-the address to jump to. Since each MIPS instruction is four-byte aligned, the address is
-right-shifted by two bits, giving a total of a 2^28 byte jump address.
+> `li` is actually a pseudo-instruction. The actual instruction there is `addiu $zero, $zero, NN`,
+> but adding zero to an number is the same as putting that number in the destination register.
+
+> For this section you will need to know the encodings of the `j`, `jr` and `addiu` instructions,
+> which are:
+
+[fancy diagram marked `J - jump to address` with the leftmost six bits as `000010`, and the other
+26 bits marked as "absolute address"]
+
+Since each MIPS instruction is four-byte aligned, the address is right-shifted by two bits, giving
+a total of a 2^28 byte jump address.
 
 As an example, to jump to the address `0321'1234`, you shift right the address by two bits to get
-`000C'848D`, AND the address with `07FF'FFFF`, and then OR in `0800'0000` to produce `080C'848D`.
-This is then used to overwrite the `jr $ra`/`03E0'0008` instruction.
+`000C'848D`, AND the address with `07FF'FFFF` to clear the six most significant bits, and then OR 
+in the six most significant bits of the `j` opcode (`0800'0000`) to produce `080C'848D`.
+
+[fancy diagram marked `JR - jump to register` with the leftmost six bits all zero, the next five
+bits marked as "source register", the next 15 bits all zero, and the rightmost six bits as
+`001000`]
+
+[fancy diagram marked `ADDIU - add immediate without overflow` with the leftmost six bits as
+`001001`, the next five bits marked as "source register", the next five bits marked as 
+"destination register", and the 16 rightmost bits marked as "signed immediate"]
+
+When an IRX is loaded into memory, you will need to overwrite the `jr $ra` stubs with `j <addr>`
+instructions. This means you will need to keep track of the function addresses, or alternatively
+look them up again after storing the module start and end addresses.
 
 The index of the function address is given in the least significant byte of the following
 `li $zero, NN` instruction, for the module listed in the import table's module name.
